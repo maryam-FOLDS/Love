@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>A Special Surprise</title>
+    <!-- Scripts & Fonts -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&family=Caveat:wght@400;700&family=Satisfy&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Global Reset/Base */
+        body, html {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .page-section {
+            display: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            transition: filter 0.5s ease-in-out;
+        }
+        .page-section.active-page {
+            display: flex; /* Use flex for easier centering */
+            z-index: 1;
+        }
+        .page-section:not(.active-page) {
+            z-index: 0;
+        }
+        .page-section.blurred {
+            filter: blur(8px) brightness(0.6);
+        }
+
+        /* --- STYLES FOR INTERFACE 1 (Universe Intro) --- */
+        #interface1 {
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            box-sizing: border-box;
+            padding: 20px;
+            background-color: #000000;
+            background-image:
+                radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
+                radial-gradient(1.5px 1.5px at 90px 40px, #fff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 25% 20%, white, rgba(0,0,0,0)),
+                radial-gradient(2.5px 2.5px at 55% 35%, white, rgba(0,0,0,0)),
+                linear-gradient(to bottom, #020107 0%, #0a0d3d 50%, #1c133a 100%);
+        }
+
+        #moon {
+            width: 100px;
+            height: 100px;
+            background-color: #f8c3d0;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #f8c3d0, 0 0 40px #f8c3d0, 0 0 60px #f8c3d0, 0 0 80px #f5a9b8;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+            z-index: 10;
+        }
+        #moon:active {
+            transform: scale(0.95);
+        }
+
+        #interface1-text {
+            margin-top: 30px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 3em;
+            color: #f0e6ef;
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.5), 0 0 10px #f8c3d0;
+            z-index: 10;
+        }
+
+        /* --- STYLES FOR INTERFACE 2 (Constellation) --- */
+        #interface2 {
+            font-family: 'Poppins', sans-serif;
+            flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(170deg, #0f0c29 0%, #302b63 60%, #24243e 100%);
+            color: #d8bfd8; padding: 1rem;
+        }
+        .greeting-message-area {
+            text-align: center;
+            position: relative; z-index: 20;
+            margin-bottom: 2vh;
+        }
+        .main-page-title {
+            font-family: 'Dancing Script', cursive; font-size: clamp(2.5rem, 10vw, 4.5rem);
+            color: #ffe4b5; margin-bottom: 0.1em; line-height: 1.1;
+            text-shadow: 0 0 12px rgba(255, 228, 181, 0.5), 0 0 20px rgba(255, 228, 181, 0.3);
+            font-weight: 700;
+            transition: cursor 0.3s;
+        }
+        .main-page-title.beating-active {
+            cursor: pointer;
+        }
+        .page-subtitle {
+            font-size: clamp(0.9rem, 3.5vw, 1.1rem); color: #d8bfd8;
+            letter-spacing: 0.5px; font-weight: 300; text-shadow: 0 0 8px rgba(216, 191, 216, 0.4);
+        }
+        .constellation-map {
+            position: relative; width: 90vw; max-width: 600px;
+            height: 55vh; max-height: 400px; z-index: 10;
+            margin-top: 20px;
+        }
+        .memory-star-point {
+            position: absolute; width: 50px; height: 50px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            filter: drop-shadow(0 0 8px rgba(255, 223, 186, 0.2));
+            opacity: 0;
+        }
+        .star-visual {
+            width: 18px; height: 18px; background-color: rgba(255, 223, 186, 0.6);
+            border-radius: 50%;
+            box-shadow: 0 0 8px 2px rgba(255, 223, 186, 0.6), 0 0 15px 6px rgba(255, 223, 186, 0.2);
+            animation: memoryStarPulse 3s infinite ease-in-out;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        #star-m1 { top: 20%; left: 15%; }
+        #star-m2 { top: 25%; left: 75%; }
+        #star-m3 { top: 65%; left: 10%; }
+        #star-m4 { top: 70%; left: 80%; }
+        #star-m5 { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+
+        @keyframes memoryStarPulse{0%,100%{transform:scale(.9);opacity:.7}50%{transform:scale(1.1);opacity:1}}
+        .memory-star-point:hover .star-visual{transform:scale(1.3) !important;box-shadow:0 0 15px 5px rgba(255,223,186,.6),0 0 30px 12px rgba(255,223,186,.2)}
+        
+        .memory-reveal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(10,5,25,.6);backdrop-filter:blur(10px) brightness(.7);display:flex;justify-content:center;align-items:center;z-index:2000;opacity:0;pointer-events:none;transition:opacity .5s ease-in-out}
+        .memory-reveal-overlay.visible{opacity:1;pointer-events:all}
+        .memory-reveal-content{position:relative;max-width:90vw;max-height:85vh;width:auto;padding:8px;opacity:0;transform:scale(.8);display:flex;flex-direction:column;align-items:center}
+        .revealed-image-container{border-radius:8px;overflow:hidden;box-shadow:0 0 30px 12px rgba(255,223,186,.2),0 0 50px 20px rgba(255,255,255,.1);background-color:rgba(0,0,0,.2);}
+        .revealed-image{display:block;max-width:85vw;max-height:65vh;width:auto;height:auto;object-fit:contain;border-radius:6px}
+        .close-reveal-button{position:absolute;top:0;right:0;font-size:2rem;color:#d8bfd8;background:0 0;border:none;cursor:pointer;padding:.5rem;line-height:1;opacity:.7;transition:opacity .3s,transform .3s,color .3s;z-index:101;text-shadow:0 0 5px #0f0c29}
+        .close-reveal-button:hover{opacity:1;transform:scale(1.15) rotate(90deg);color:#fff}
+
+        /* --- STYLES FOR INTERFACE 3 (Typewriter) --- */
+        #interface3 {
+            flex-direction: column; align-items: center; justify-content: center;
+            background-color: #020107;
+            padding: 1rem;
+        }
+        #typewriter-container {
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 25px;
+            border-radius: 15px;
+            max-width: 85%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            z-index: 1;
+        }
+        #typewriter-text {
+            font-family: 'Satisfy', cursive; /* Style from example code */
+            font-size: 1.6em; 
+            line-height: 1.7;
+            white-space: pre-wrap;
+            color: #f5f5f5;
+            text-align: left;
+        }
+        #typewriter-text .cursor {
+            display: inline-block;
+            background-color: #f5f5f5;
+            width: 2px; height: 1.5em; /* Adjusted for Satisfy font */
+            animation: blink 1s step-end infinite;
+            margin-left: 4px;
+            vertical-align: text-bottom;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+        
+        #final-message-popup {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 3000;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        #final-popup-content {
+            font-family: 'Dancing Script', sans-serif;
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #ffc2d1;
+            text-shadow: 1px 1px 5px #000, 0 0 15px #ffc2d1;
+        }
+        #credits {
+            font-family: 'Poppins', sans-serif;
+            margin-top: 20px;
+            font-size: 1em;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 1px 1px 3px #000;
+        }
+        #credits span { display: block; margin-top: 5px; font-size: 0.9em; opacity: 0.7; }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            #interface1-text { font-size: 2.2em; }
+            #moon { width: 80px; height: 80px; }
+            .main-page-title { font-size: 2.5rem; }
+            #typewriter-text { font-size: 1.2em; }
+            #final-popup-content { font-size: 2em; }
+            #credits { font-size: 0.9em; }
+        }
+
+    </style>
+</head>
+<body>
+    
+    <audio id="songPlayer" loop preload="auto">
+        <source src="https://github.com/maryam-FOLDS/Love/raw/main/Vtv%20Movie%20Cute%20Love%20Whatsapp%20Status%20_%20Anbil%20Avan%20Song%20Status%20_%20Simbu%20%E2%9D%A4%EF%B8%8F%20Trisha%20Romantic%20Status%20_%20Arr%20%5BNGTGuIfM-yc%5D.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Interface 1: Universe Intro -->
+    <div id="interface1" class="page-section active-page">
+        <div id="moon"></div>
+        <p id="interface1-text">every beat started with you</p>
+    </div>
+
+    <!-- Interface 2: Constellation of Memories -->
+    <div class="page-section" id="interface2">
+        <div class="greeting-message-area">
+            <h1 class="main-page-title">Happy birthday my love</h1>
+            <p class="page-subtitle">Our memories, shining by your light.</p>
+        </div>
+        <div class="constellation-map">
+            <div class="memory-star-point" id="star-m1" data-milestone-id="m1"><div class="star-visual"></div></div>
+            <div class="memory-star-point" id="star-m2" data-milestone-id="m2"><div class="star-visual"></div></div>
+            <div class="memory-star-point" id="star-m3" data-milestone-id="m3"><div class="star-visual"></div></div>
+            <div class="memory-star-point" id="star-m4" data-milestone-id="m4"><div class="star-visual"></div></div>
+            <div class="memory-star-point" id="star-m5" data-milestone-id="m5"><div class="star-visual"></div></div>
+        </div>
+        <div class="memory-reveal-overlay">
+            <div class="memory-reveal-content">
+                <button class="close-reveal-button" aria-label="Close memory view">&times;</button>
+                <div class="revealed-image-container">
+                    <img src="" alt="A shining memory" class="revealed-image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interface 3: Typewriter Note -->
+    <div class="page-section" id="interface3">
+        <div id="typewriter-container">
+            <p id="typewriter-text">
+                <span id="typed-content"></span><span class="cursor"></span>
+            </p>
+        </div>
+    </div>
+    
+    <!-- Final Message Popup (for Interface 3) -->
+    <div id="final-message-popup">
+        <div id="final-popup-content">Forever stronger together 💗🧿</div>
+        <div id="credits">
+            sent to you by subiksha
+            <span>made by MARYAM</span>
+            <span>date-18-06-2025</span>
+        </div>
+    </div>
+
+
+    <script>
+        const allPages = document.querySelectorAll(".page-section");
+        const songPlayer = document.getElementById('songPlayer');
+        
+        function showPage(pageId) {
+            let pageToShow = document.getElementById(pageId);
+            
+            allPages.forEach(page => {
+                if (page.id !== pageId && page.classList.contains('active-page')) {
+                    gsap.to(page, {
+                        opacity: 0,
+                        duration: 0.8,
+                        ease: "power2.in",
+                        onComplete: () => {
+                            page.classList.remove('active-page');
+                            page.style.display = 'none';
+                        }
+                    });
+                }
+            });
+
+            if (pageToShow && !pageToShow.classList.contains('active-page')) {
+                pageToShow.classList.add('active-page');
+                pageToShow.style.display = 'flex';
+                gsap.fromTo(pageToShow, { opacity: 0 }, {
+                    opacity: 1,
+                    duration: 1.0,
+                    ease: "power2.out",
+                    onComplete: () => {
+                        if (pageId === 'interface2') initInterface2();
+                        if (pageId === 'interface3') initInterface3();
+                    }
+                });
+            }
+        }
+
+        // --- INTERFACE 1: UNIVERSE ---
+        const moon = document.getElementById('moon');
+        let lastTapTime = 0;
+        moon.addEventListener('click', () => {
+            const currentTime = new Date().getTime();
+            if (currentTime - lastTapTime < 300) {
+                showPage('interface2');
+                lastTapTime = 0;
+            } else {
+                lastTapTime = currentTime;
+            }
+        });
+
+        // --- INTERFACE 2: CONSTELLATION ---
+        const memories = {
+            m1: { image: "https://github.com/maryam-FOLDS/Love/raw/main/Image1.jpg" },
+            m2: { image: "https://github.com/maryam-FOLDS/Love/raw/main/Image2.jpg" },
+            m3: { image: "https://github.com/maryam-FOLDS/Love/raw/main/Image3.jpg" },
+            m4: { image: "https://github.com/maryam-FOLDS/Love/raw/main/Image4.jpg" },
+            m5: { image: "https://github.com/maryam-FOLDS/Love/raw/main/Image5.jpg" }
+        };
+        const totalStars = 5;
+        const clickedStars = new Set();
+        const memoryStars = document.querySelectorAll('#interface2 .memory-star-point');
+        const memoryOverlay = document.querySelector('#interface2 .memory-reveal-overlay');
+        const revealedImage = document.querySelector('#interface2 .revealed-image');
+        const closeOverlayBtn = document.querySelector('#interface2 .close-reveal-button');
+        let titleBeatingAnimation = null;
+
+        function initInterface2() {
+            if (songPlayer.paused) {
+                songPlayer.play().catch(e => console.error("Song play failed:", e));
+            }
+            const introTl = gsap.timeline({ delay: 0.5 });
+            introTl.fromTo('.greeting-message-area', { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 1.2, ease: "power3.out" });
+            memoryStars.forEach((star) => {
+                introTl.fromTo(star, { opacity: 0, scale: 0.5 }, { opacity: 1, scale: 1, duration: 0.8, ease: "back.out(1.4)" }, `-=0.7`);
+            });
+        }
+
+        function showMemory(milestoneId) {
+            if (!memories[milestoneId]) return;
+            revealedImage.src = memories[milestoneId].image;
+            memoryOverlay.classList.add('visible');
+            gsap.fromTo('.memory-reveal-content', { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.2)" });
+
+            clickedStars.add(milestoneId);
+            if (clickedStars.size === totalStars) {
+                activateTitleBeating();
+            }
+        }
+
+        function closeMemory() {
+            gsap.to('.memory-reveal-content', {
+                opacity: 0, scale: 0.8, duration: 0.3, ease: "power2.in",
+                onComplete: () => memoryOverlay.classList.remove('visible')
+            });
+        }
+        
+        function activateTitleBeating() {
+            const titleEl = document.querySelector('#interface2 .main-page-title');
+            if (titleEl && !titleEl.classList.contains('beating-active')) {
+                titleEl.classList.add('beating-active');
+                titleBeatingAnimation = gsap.to(titleEl, {
+                    scale: 1.05,
+                    textShadow: "0 0 20px rgba(255, 228, 181, 0.8), 0 0 30px rgba(255, 228, 181, 0.5)",
+                    duration: 0.7,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: "sine.inOut"
+                });
+                titleEl.addEventListener('click', handleTitleClick, { once: true });
+            }
+        }
+
+        function handleTitleClick() {
+            const titleEl = document.querySelector('#interface2 .main-page-title');
+            if (titleBeatingAnimation) titleBeatingAnimation.kill();
+            gsap.to(titleEl, { scale: 1, textShadow: "0 0 12px rgba(255, 228, 181, 0.5), 0 0 20px rgba(255, 228, 181, 0.3)", duration: 0.3 });
+            showPage('interface3');
+        }
+
+        memoryStars.forEach(star => star.addEventListener('click', () => showMemory(star.dataset.milestoneId)));
+        closeOverlayBtn.addEventListener('click', closeMemory);
+        memoryOverlay.addEventListener('click', (e) => { if(e.target === memoryOverlay) closeMemory() });
+
+        // --- INTERFACE 3: TYPEWRITER ---
+        const typewriterText = `Mark 10: 9
+
+To my Man,
+Sam, 1yr epdi ponadhu nu thrla, avlo sirippu, sandhosam, kaadhal, kavala, Alugai ellam naama rendu perum paathuttom. But innum koraiya feel aagudhu ma ✨❤️‍🩹 . Edhirpaakama vandha notification ipdilaam oruthar life ah alaga aaakum nu nenaikala🥹 Ennoda ellamey nee thaa ma ❤️🧿 En Uyiree!!! Enna yaarum ivlo Love pannadhu illa... Ennoda periya Varam neenga ✨💎 Namma first chat, first phone call, meet😍 , First Sanda, bike ride, first kiss😌 beach date, noon meal, gifts, video call, first bus travel, ellamey avlo alagana tharunam 🧿🥹 600km travel panni oruthar Varuvanga nu unnala thaa therinjikkiten🥰 I'm so lucky to have you!!! Ma please enkudave irundhuru♾️c❤️ Nijamave unnala avlo happy ah irukken, na evlo torture pannalum porumaiya irukinga, 🙃 Evlovo aludhutten, ipo adhuku ellam serthu vachu sirikuren!!! Ipdiye enna sirika vachu paathukonga😚 Kandippa naanum ungala apdi paathuppen😌 
+
+Endha oru expectations illama edhirpaarama kedaicha unna theriyama kuda thoalachira kudadhu ❤️‍🩹 Ne en uyiruu, en varam, en aasirvaadham, Ennoda prayers oda palan nee 💎🧿❤️♾️ 
+
+I Love You So Much Sam ❤️
+
+Forever ♾️ 
+Samuel ❤️ Subiksha`;
+
+        function initInterface3() {
+            startTypewriter();
+        }
+
+        function startTypewriter() {
+            const typedContentSpan = document.getElementById('typed-content');
+            const cursorSpan = document.querySelector('#typewriter-text .cursor');
+            let i = 0;
+            typedContentSpan.innerHTML = "";
+            cursorSpan.style.display = 'inline-block';
+
+            function type() {
+                if (i < typewriterText.length) {
+                    typedContentSpan.innerHTML += typewriterText.charAt(i);
+                    i++;
+                    setTimeout(type, 50); // Typing speed
+                } else {
+                    cursorSpan.style.display = 'none';
+                    setTimeout(showFinalMessage, 1500);
+                }
+            }
+            type();
+        }
+        
+        function showFinalMessage() {
+            const interface3Page = document.getElementById('interface3');
+            const finalPopup = document.getElementById('final-message-popup');
+            
+            interface3Page.classList.add('blurred');
+            finalPopup.style.display = 'flex';
+            
+            gsap.fromTo(finalPopup, { opacity: 0 }, { opacity: 1, duration: 1.5, ease: 'power2.out' });
+        }
+
+        // --- INITIAL LOAD ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialPage = document.getElementById('interface1');
+            initialPage.style.display = 'flex';
+            initialPage.style.opacity = 1;
+        });
+
+    </script>
+</body>
+</html>
